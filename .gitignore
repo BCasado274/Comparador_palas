@@ -1,0 +1,19 @@
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+.env
+*.log
+
+# Virtual environments
+venv/
+env/
+
+# VSCode
+.vscode/
+
+# Scrapy
+.scrapy/
+
+# CSVs (opcional, si no quieres subirlos)
+*.csv

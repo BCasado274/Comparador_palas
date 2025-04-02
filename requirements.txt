@@ -1,0 +1,7 @@
+# Esto le dice a pip qué paquetes instalar (y sus versiones más recientes por defecto).
+
+requests
+beautifulsoup4
+unidecode
+django
+djangorestframework
