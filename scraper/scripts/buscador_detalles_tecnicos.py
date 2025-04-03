@@ -2,37 +2,36 @@ import pandas as pd
 from duckduckgo_search import DDGS
 import time
 
-# Ruta al CSV con las palas
 ruta_csv = '../data/processed/palas_sin_duplicados.csv'
-
-# Cargar el archivo y extraer nombres únicos
 df = pd.read_csv(ruta_csv)
 nombres_palas = df['nombre'].drop_duplicates().tolist()
 
-print(f"🔍 Se encontraron {len(nombres_palas)} palas únicas.")
-
-# Buscar URLs en padelnuestro y padeliberico
 def buscar_url_pala(nombre_pala):
     query = f"{nombre_pala} ficha técnica site:padelnuestro.com OR site:padeliberico.es"
     try:
         with DDGS() as ddgs:
             results = ddgs.text(query, max_results=1)
             for r in results:
-                return r.get('href')
+                url = r.get('href')
+                # Solo aceptamos si es padelnuestro o padeliberico
+                if url and ('padelnuestro.com' in url or 'padeliberico.es' in url):
+                    return url
     except Exception as e:
         print(f"⚠️ Error con '{nombre_pala}': {e}")
     return None
 
-# Buscar y guardar resultados
 resultados = []
 
-for i, nombre in enumerate(nombres_palas):
+for i, nombre in enumerate(nombres_palas[:15]):  # Solo 15 para asegurar que algunos funcionen
     url = buscar_url_pala(nombre)
-    resultados.append({'nombre': nombre, 'url': url})
-    print(f"{i+1:03d}/{len(nombres_palas)} - {nombre} → {url if url else '❌ No encontrada'}")
-    time.sleep(7)  # Pausa para evitar bloqueo
+    if url:
+        resultados.append({'nombre': nombre, 'url': url})
+        print(f"{i+1:02d} ✅ {nombre} → {url}")
+    else:
+        print(f"{i+1:02d} ❌ {nombre} → No encontrada")
+    time.sleep(2.5)
 
-# Guardar en CSV
-output_csv = '../data/processed/urls_detectadas.csv'
-pd.DataFrame(resultados).to_csv(output_csv, index=False)
-print(f"\n✅ URLs guardadas en: {output_csv}")
+# Guardar archivo reducido
+df_urls = pd.DataFrame(resultados)
+df_urls.to_csv('../data/processed/urls_detectadas.csv', index=False)
+print("\n✅ URLs guardadas en ../data/processed/urls_detectadas.csv")
